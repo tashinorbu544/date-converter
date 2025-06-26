@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Date Converter</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -11,77 +11,81 @@
     }
     body {
       font-family: 'Inter', sans-serif;
-      background: #f0f2f5;
       margin: 0;
       padding: 0;
+      background: linear-gradient(to right, #e3f2fd, #ffffff);
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       min-height: 100vh;
     }
-    .container {
-      background: #fff;
-      padding: 30px;
-      margin-top: 50px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .card {
+      background: #ffffff;
+      padding: 30px 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 420px;
       width: 100%;
-      max-width: 400px;
     }
     h2 {
-      margin-top: 0;
-      font-size: 24px;
-      color: #333;
       text-align: center;
+      color: #333;
+      margin-bottom: 20px;
     }
     label {
       font-weight: 600;
+      margin-top: 15px;
       display: block;
-      margin-bottom: 6px;
-      margin-top: 20px;
+      color: #333;
     }
-    input[type="number"] {
+    input[type="text"] {
       width: 100%;
       padding: 10px;
+      margin-top: 5px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    }
+    .warning {
+      color: red;
+      font-size: 13px;
+      margin-top: 4px;
+      display: none;
     }
     .buttons-group {
       display: flex;
-      justify-content: space-between;
       flex-wrap: wrap;
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 10px;
     }
     .buttons-group button {
-      flex: 1 1 auto;
-      margin: 4px;
-      padding: 10px 12px;
-      font-size: 14px;
-      border: 1px solid #007bff;
-      background-color: white;
-      color: #007bff;
+      flex: 1;
+      padding: 10px;
+      background: #f0f0f0;
+      border: 1px solid #aaa;
       border-radius: 6px;
+      font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      transition: 0.2s ease;
+    }
+    .buttons-group button:hover {
+      background-color: #007bff;
+      color: white;
     }
     .buttons-group button.selected {
       background-color: #007bff;
       color: white;
-    }
-    .buttons-group button:hover {
-      background-color: #0056b3;
-      color: white;
+      border-color: #0056b3;
     }
     #convertBtn {
-      width: 100%;
       margin-top: 20px;
+      width: 100%;
       padding: 12px;
-      font-size: 16px;
-      background-color: #28a745;
+      background: #28a745;
       color: white;
+      font-size: 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
@@ -91,90 +95,100 @@
     #result {
       margin-top: 20px;
       font-size: 18px;
-      font-weight: bold;
-      color: #333;
       text-align: center;
+      color: #333;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Date Converter</h2>
+<div class="card">
+  <h2>📆 Date Converter</h2>
 
-    <label for="inputYear">Enter Year:</label>
-    <input id="inputYear" type="number" placeholder="e.g. 1500" />
+  <label for="inputYear">Enter Year:</label>
+  <input type="text" id="inputYear" placeholder="e.g. 1500">
+  <div class="warning" id="warningText">⚠️ Please enter a valid number only.</div>
 
-    <label>Input Type:</label>
-    <div class="buttons-group" id="inputTypeButtons">
-      <button data-type="AD" class="selected">AD</button>
-      <button data-type="BP">BP</button>
-      <button data-type="BC">BC</button>
-    </div>
-
-    <label>Convert To:</label>
-    <div class="buttons-group" id="outputTypeButtons">
-      <button data-type="AD" class="selected">AD</button>
-      <button data-type="BP">BP</button>
-      <button data-type="BC">BC</button>
-    </div>
-
-    <button id="convertBtn">Convert</button>
-
-    <div id="result"></div>
+  <label>Input Type:</label>
+  <div class="buttons-group" id="inputTypeButtons">
+    <button data-type="AD" class="selected">AD</button>
+    <button data-type="BP">BP</button>
+    <button data-type="BC">BC</button>
   </div>
 
-  <script>
-    function setupToggleButtons(containerId) {
-      const container = document.getElementById(containerId);
-      container.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          container.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
-          btn.classList.add("selected");
-        });
+  <label>Convert To:</label>
+  <div class="buttons-group" id="outputTypeButtons">
+    <button data-type="AD" class="selected">AD</button>
+    <button data-type="BP">BP</button>
+    <button data-type="BC">BC</button>
+  </div>
+
+  <button id="convertBtn">🔄 Convert</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+  function setupToggleButtons(containerId) {
+    const container = document.getElementById(containerId);
+    container.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        container.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
       });
-    }
-
-    setupToggleButtons("inputTypeButtons");
-    setupToggleButtons("outputTypeButtons");
-
-    function convertYear(value, fromType, toType) {
-      let adYear;
-      if (fromType === "AD") {
-        adYear = value;
-      } else if (fromType === "BP") {
-        adYear = 1950 - value;
-      } else if (fromType === "BC") {
-        adYear = -value + 1;
-      } else {
-        return "Unknown input type";
-      }
-
-      if (toType === "AD") {
-        return adYear;
-      } else if (toType === "BP") {
-        return 1950 - adYear;
-      } else if (toType === "BC") {
-        return 1 - adYear;
-      } else {
-        return "Unknown output type";
-      }
-    }
-
-    document.getElementById("convertBtn").addEventListener("click", () => {
-      const inputVal = Number(document.getElementById("inputYear").value);
-      if (isNaN(inputVal)) {
-        document.getElementById("result").innerText = "⚠️ Please enter a valid year.";
-        return;
-      }
-
-      const inputType = document.querySelector("#inputTypeButtons button.selected").dataset.type;
-      const outputType = document.querySelector("#outputTypeButtons button.selected").dataset.type;
-
-      const converted = convertYear(inputVal, inputType, outputType);
-      document.getElementById("result").innerText = `➡️ ${inputVal} ${inputType} = ${converted} ${outputType}`;
     });
-  </script>
+  }
+
+  setupToggleButtons("inputTypeButtons");
+  setupToggleButtons("outputTypeButtons");
+
+  function convertYear(value, fromType, toType) {
+    let adYear;
+    if (fromType === "AD") {
+      adYear = value;
+    } else if (fromType === "BP") {
+      adYear = 1950 - value;
+    } else if (fromType === "BC") {
+      adYear = -value + 1;
+    }
+
+    if (toType === "AD") {
+      return adYear;
+    } else if (toType === "BP") {
+      return 1950 - adYear;
+    } else if (toType === "BC") {
+      return 1 - adYear;
+    }
+  }
+
+  const inputEl = document.getElementById("inputYear");
+  const warningText = document.getElementById("warningText");
+
+  inputEl.addEventListener("input", () => {
+    const val = inputEl.value.trim();
+    if (val === "" || isNaN(val)) {
+      warningText.style.display = "block";
+    } else {
+      warningText.style.display = "none";
+    }
+  });
+
+  document.getElementById("convertBtn").addEventListener("click", () => {
+    const val = inputEl.value.trim();
+    if (val === "" || isNaN(val)) {
+      warningText.style.display = "block";
+      document.getElementById("result").innerText = "";
+      return;
+    }
+
+    const inputValue = Number(val);
+    const inputType = document.querySelector("#inputTypeButtons button.selected").dataset.type;
+    const outputType = document.querySelector("#outputTypeButtons button.selected").dataset.type;
+    const result = convertYear(inputValue, inputType, outputType);
+
+    document.getElementById("result").innerText = `✅ ${inputValue} ${inputType} = ${result} ${outputType}`;
+  });
+</script>
 
 </body>
 </html>
