@@ -2,92 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BC/AD/BP Date Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Date Converter</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background-color: #f9f9f9;
-      color: #333;
-      max-width: 600px;
-      margin: auto;
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    input[type="number"] { width: 120px; padding: 8px; font-size: 16px; }
+    .buttons-group { margin: 10px 0; }
+    button {
+      padding: 8px 15px;
+      margin-right: 8px;
+      font-size: 14px;
+      cursor: pointer;
     }
-    h1 { color: #006699; }
-    input, button {
-      font-size: 1rem;
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      width: 100%;
+    button.selected {
+      background-color: #007bff;
+      color: white;
     }
-    #output {
-      margin-top: 1rem;
-      padding: 1rem;
-      background-color: #e0f7fa;
-      border-left: 5px solid #0097a7;
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h1>BC / AD / BP Date Converter</h1>
-  <p>Enter a date (e.g., <strong>500BC</strong>, <strong>1200AD</strong>, <strong>3000BP</strong>)</p>
 
-  <input type="text" id="date1" placeholder="First date" />
-  <input type="text" id="date2" placeholder="Second date (optional)" />
-  <button onclick="convert()">Convert</button>
+  <h2>Date Converter</h2>
 
-  <div id="output"></div>
+  <label for="inputYear">Enter Year:</label>
+  <input id="inputYear" type="number" placeholder="Enter a year" />
 
-  <script>
-    function parseInput(input) {
-      input = input.trim().toUpperCase();
-      if (input.endsWith("BC")) return [-parseInt(input), "BC"];
-      if (input.endsWith("AD")) return [parseInt(input), "AD"];
-      if (input.endsWith("BP")) return [parseInt(input), "BP"];
-      throw new Error("Invalid format. Use BC, AD, or BP.");
+  <div>
+    <strong>Input Type:</strong>
+    <div class="buttons-group" id="inputTypeButtons">
+      <button data-type="AD" class="selected">AD</button>
+      <button data-type="BP">BP</button>
+      <button data-type="BC">BC</button>
+    </div>
+  </div>
+
+  <div>
+    <strong>Output Type:</strong>
+    <div class="buttons-group" id="outputTypeButtons">
+      <button data-type="AD" class="selected">AD</button>
+      <button data-type="BP">BP</button>
+      <button data-type="BC">BC</button>
+    </div>
+  </div>
+
+  <button id="convertBtn">Convert</button>
+
+  <div id="result"></div>
+
+<script>
+  // Handle button selection toggling
+  function setupToggleButtons(containerId) {
+    const container = document.getElementById(containerId);
+    container.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        container.querySelectorAll("button").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+    });
+  }
+
+  setupToggleButtons("inputTypeButtons");
+  setupToggleButtons("outputTypeButtons");
+
+  // Conversion logic here
+  // For simplicity, we assume:
+  // AD = actual year CE (e.g. 2025)
+  // BP = Before Present (1950)
+  // BC = Before Christ (negative years, no year 0)
+  // So convert input year from input type to output type
+
+  function convertYear(value, fromType, toType) {
+    // Convert input value to AD year first
+    let adYear;
+    if (fromType === "AD") {
+      adYear = value;
+    } else if (fromType === "BP") {
+      adYear = 1950 - value;
+    } else if (fromType === "BC") {
+      adYear = -value + 1; // BC 1 = AD 0 (no year 0 in history, but in programming we use 0)
+    } else {
+      return "Unknown input type";
     }
 
-    function bcToBp(bc) { return 1950 + bc; }
-    function adToBp(ad) { return 1950 - ad; }
-    function bpToBc(bp) { return bp - 1950 > 0 ? bp - 1950 : null; }
-    function bpToAd(bp) { return 1950 - bp > 0 ? 1950 - bp : null; }
-
-    function convert() {
-      const input1 = document.getElementById("date1").value;
-      const input2 = document.getElementById("date2").value;
-      let output = "";
-
-      try {
-        const [year1, type1] = parseInput(input1);
-        if (type1 === "BC") {
-          output += `${-year1} BC = ${bcToBp(-year1)} BP<br>`;
-        } else if (type1 === "AD") {
-          output += `${year1} AD = ${adToBp(year1)} BP<br>`;
-        } else if (type1 === "BP") {
-          const bc = bpToBc(year1);
-          const ad = bpToAd(year1);
-          output += `${year1} BP = ${bc ? bc + " BC" : ad + " AD"}<br>`;
-        }
-      } catch (e) {
-        output += `<span style="color:red;">Error: ${e.message}</span><br>`;
-      }
-
-      if (input2) {
-        try {
-          const [year2, _] = parseInput(input2);
-          const [year1] = parseInput(input1);
-          if ((year1 < 0 && year2 > 0) || (year1 > 0 && year2 < 0)) {
-            output += `Transition across 1 BC / 1 AD boundary`;
-          } else {
-            output += `No transition across BC/AD boundary`;
-          }
-        } catch {
-          output += `<br><span style="color:red;">Second date could not be parsed</span>`;
-        }
-      }
-
-      document.getElementById("output").innerHTML = output;
+    // Convert AD year to output type
+    if (toType === "AD") {
+      return adYear;
+    } else if (toType === "BP") {
+      return 1950 - adYear;
+    } else if (toType === "BC") {
+      return 1 - adYear;
+    } else {
+      return "Unknown output type";
     }
-  </script>
+  }
+
+  document.getElementById("convertBtn").addEventListener("click", () => {
+    const inputVal = Number(document.getElementById("inputYear").value);
+    if (isNaN(inputVal)) {
+      document.getElementById("result").innerText = "Please enter a valid year number.";
+      return;
+    }
+
+    const inputType = document.querySelector("#inputTypeButtons button.selected").dataset.type;
+    const outputType = document.querySelector("#outputTypeButtons button.selected").dataset.type;
+
+    const converted = convertYear(inputVal, inputType, outputType);
+
+    document.getElementById("result").innerText = `Converted Year (${outputType}): ${converted}`;
+  });
+</script>
+
 </body>
 </html>
+
